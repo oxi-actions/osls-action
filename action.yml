@@ -8,7 +8,7 @@ inputs:
   osls-version:
     description: "Version of the osls package to install (SemVer or tag)."
     required: false
-    default: "3.59.2"
+    default: "3.59.3"
 outputs:
   osls-version:
     description: "Detected osls version after installation."
