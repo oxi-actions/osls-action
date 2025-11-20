@@ -1,0 +1,35 @@
+{
+  "name": "action-osls",
+  "version": "0.1.0",
+  "description": "GitHub Action that installs the osls CLI globally",
+  "main": "dist/index.js",
+  "type": "commonjs",
+  "files": [
+    "action.yml",
+    "dist"
+  ],
+  "scripts": {
+    "lint": "biome check .",
+    "lint:fix": "biome check --apply .",
+    "test": "npm run lint"
+  },
+  "keywords": [
+    "github-action",
+    "osls",
+    "serverless",
+    "deployment"
+  ],
+  "author": "Daniel Santana",
+  "license": "ISC",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/exec": "^1.1.1",
+    "osls": "^3.59.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.6"
+  }
+}
