@@ -1,6 +1,7 @@
 name: Release Action
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - 'v*'
@@ -18,7 +19,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install Dependencies
@@ -44,6 +45,7 @@ jobs:
           generate_release_notes: true
           files: |
             dist/index.js
+            dist/osls_bundle.js
             action.yml
             README.md
             LICENSE
