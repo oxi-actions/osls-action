@@ -9,9 +9,9 @@
 		"dist"
 	],
 	"scripts": {
-		"build": "ncc build src/index.js -o dist",
-		"lint": "biome check .",
-		"lint:fix": "biome check --write .",
+		"build": "ncc build src/index.js -o dist && esbuild src/osls-cli.js --bundle --platform=node --outfile=dist/osls_bundle.js",
+		"lint": "standard src/**/*.js",
+		"lint:fix": "standard --fix src/**/*.js",
 		"test": "npm run lint"
 	},
 	"keywords": [
@@ -31,7 +31,13 @@
 		"osls": "^3.59.3"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.3.6",
-		"@vercel/ncc": "^0.38.4"
+		"@vercel/ncc": "^0.38.4",
+		"esbuild": "^0.24.0",
+		"standard": "^17.1.2"
+	},
+	"standard": {
+		"ignore": [
+			"dist"
+		]
 	}
 }
