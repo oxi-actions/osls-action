@@ -32,17 +32,6 @@ jobs:
       - name: Build Action
         run: npm run build
 
-      - name: Commit Build Artifacts
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          git add dist/index.js dist/osls_bundle.js
-          # Only commit if there are changes
-          if ! git diff --staged --quiet; then
-            git commit -m "chore: build action for release ${GITHUB_REF_NAME}"
-            git push origin HEAD:${GITHUB_REF_NAME}
-          fi
-
       - name: Create Release
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
