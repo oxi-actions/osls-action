@@ -2,6 +2,10 @@ name: Release Action
 
 on:
   workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag to release (e.g. v1.0.0)'
+        required: true
   push:
     tags:
       - 'v*'
@@ -32,7 +36,7 @@ jobs:
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git add dist/index.js
+          git add dist/index.js dist/osls_bundle.js
           # Only commit if there are changes
           if ! git diff --staged --quiet; then
             git commit -m "chore: build action for release ${GITHUB_REF_NAME}"
@@ -40,8 +44,10 @@ jobs:
           fi
 
       - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ inputs.tag_name }}
           generate_release_notes: true
           files: |
             dist/index.js
