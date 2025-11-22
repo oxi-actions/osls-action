@@ -25,11 +25,11 @@ runs:
         echo "BIN_DIR=$BIN_DIR"
         mkdir -p "$BIN_DIR"
 
-        cp -f "$(pwd)/dist/osls_bundle.js" "$BIN_DIR/osls_bundle.js"
+        cp -f "$GITHUB_ACTION_PATH/dist/osls_bundle.js" "$BIN_DIR/osls_bundle.js"
         export OSLS_BINARY_PATH="$BIN_DIR/osls"
         echo "OSLS_BINARY_PATH=$OSLS_BINARY_PATH"
 
-        echo '#!/bin/sh' >> "$OSLS_BINARY_PATH"
+        echo '#!/bin/sh' > "$OSLS_BINARY_PATH"
         echo "exec node $BIN_DIR/osls_bundle.js \$@" >> "$OSLS_BINARY_PATH"
 
         chmod +x "$OSLS_BINARY_PATH"
@@ -41,7 +41,7 @@ runs:
       run: |
         $bin = "$Env:RUNNER_TEMP\\osls\\bin"
         New-Item -ItemType Directory -Force -Path $bin | Out-Null
-        Copy-Item -Path "$(pwd)\\dist\\osls_bundle.js" -Destination "$bin\\osls_bundle.js" -Force
+        Copy-Item -Path "$Env:GITHUB_ACTION_PATH\\dist\\osls_bundle.js" -Destination "$bin\\osls_bundle.js" -Force
         $cmd = '@echo off\r\nnode "%~dp0\\osls_bundle.js" %*\r\n'
         Set-Content -Path "$bin\\osls.cmd" -Value $cmd -NoNewline -Encoding Ascii
         Add-Content -Path $Env:GITHUB_PATH -Value $bin
