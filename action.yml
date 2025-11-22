@@ -21,14 +21,18 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
-        BIN_DIR="${{ runner.temp }}/osls/bin"
+        export BIN_DIR="${{ runner.temp }}/osls/bin"
+        echo "BIN_DIR=$BIN_DIR"
         mkdir -p "$BIN_DIR"
+
         cp -f "$(pwd)/dist/osls_bundle.js" "$BIN_DIR/osls_bundle.js"
-        cat > "$BIN_DIR/osls" <<EOF
-          #!/bin/sh
-          exec node "$BIN_DIR/osls_bundle.js" "$@"
-        EOF
-        chmod +x "$BIN_DIR/osls"
+        export OSLS_BINARY_PATH="$BIN_DIR/osls"
+        echo "OSLS_BINARY_PATH=$OSLS_BINARY_PATH"
+
+        echo '#!/bin/sh' >> "$OSLS_BINARY_PATH"
+        echo "exec node $BIN_DIR/osls_bundle.js \$@" >> "$OSLS_BINARY_PATH"
+
+        chmod +x "$OSLS_BINARY_PATH"
         echo "$BIN_DIR" >> "$GITHUB_PATH"
 
     - name: Install bundled osls (Windows)
@@ -47,7 +51,12 @@ runs:
       if: runner.os != 'Windows'
       shell: bash
       run: |
-        echo "osls-version=$(osls --version)" >> $GITHUB_OUTPUT
+        # Multi-line-safe output for osls-version
+        echo "osls-version<<EOF" >> $GITHUB_OUTPUT
+        osls --version >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+        # Path is single-line but keep consistent
         echo "osls-path=$(which osls)" >> $GITHUB_OUTPUT
 
     - id: verify-windows
@@ -55,7 +64,11 @@ runs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        $version = (& osls --version) -join "\n"
-        Add-Content -Path $Env:GITHUB_OUTPUT -Value "osls-version=$version"
+        # Multi-line-safe output for Windows
+        $version = (& osls --version) -join "`n"
+        Add-Content -Path $Env:GITHUB_OUTPUT -Value "osls-version<<EOF"
+        Add-Content -Path $Env:GITHUB_OUTPUT -Value $version
+        Add-Content -Path $Env:GITHUB_OUTPUT -Value "EOF"
+
         $path = (Get-Command osls).Path
         Add-Content -Path $Env:GITHUB_OUTPUT -Value "osls-path=$path"
