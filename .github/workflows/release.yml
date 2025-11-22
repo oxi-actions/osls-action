@@ -1,3 +1,61 @@
+name: Build & Publish Release Assets
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-and-upload:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build dist
+        run: npm run build
+
+      - name: Package node_modules (optional)
+        run: |
+          if [ -d dist/node_modules ]; then
+            tar -C dist -czf dist/osls_node_modules.tgz node_modules
+          fi
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v3
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+
+      - name: Upload osls_bundle.js
+        if: always()
+        uses: actions/upload-release-asset@v2
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/osls_bundle.js
+          asset_name: osls_bundle.js
+          asset_content_type: application/javascript
+
+      - name: Upload node_modules tarball
+        if: always() && ( -f dist/osls_node_modules.tgz )
+        uses: actions/upload-release-asset@v2
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/osls_node_modules.tgz
+          asset_name: osls_node_modules.tgz
+          asset_content_type: application/gzip
 name: Release Action
 
 on:
