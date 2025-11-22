@@ -30,15 +30,25 @@ jobs:
       - name: Clean Dependencies
         run: rm -rf node_modules
 
+      - name: Start install timer (default)
+        run: echo "START=$(date +%s%3N)" >> $GITHUB_ENV
+
       - name: Test Action (Default Version)
         uses: ./
         id: install-default
+
+      - name: End install timer (default)
+        run: echo "END=$(date +%s%3N)" >> $GITHUB_ENV
 
       - name: Verify Default Installation
         run: |
           echo "Installed version: ${{ steps.install-default.outputs.osls-version }}"
           echo "Binary path: ${{ steps.install-default.outputs.osls-path }}"
           osls --version
+          echo "Install time (ms): $((END-START))"
+
+      - name: Start install timer (specific)
+        run: echo "START=$(date +%s%3N)" >> $GITHUB_ENV
 
       - name: Test Action (Specific Version)
         uses: ./
@@ -46,7 +56,11 @@ jobs:
           osls-version: '3.59.3'
         id: install-specific
 
+      - name: End install timer (specific)
+        run: echo "END=$(date +%s%3N)" >> $GITHUB_ENV
+
       - name: Verify Specific Installation
         run: |
           echo "Installed version: ${{ steps.install-specific.outputs.osls-version }}"
           osls --version
+          echo "Install time (ms): $((END-START))"
