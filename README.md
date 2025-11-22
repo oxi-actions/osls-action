@@ -2,6 +2,8 @@
 
 This GitHub Action installs the `osls` serverless CLI globally in your workflow environment, enabling you to deploy and manage serverless applications.
 
+Note: this action ships a vendored, self-contained `osls` bundle in `dist/` so it does not run `npm install` at action runtime. That means the step completes in ≈1–3s on a fresh runner (no cache required), instead of ~30s for a runtime `npm install -g osls`.
+
 ## Usage
 
 ```yaml
@@ -47,3 +49,7 @@ steps:
 ## License
 
 MIT
+
+## Release notes
+
+- v1.0.1: Vendored self-contained `osls_bundle.js` to ensure fast, deterministic installs (no network/install required at runtime).
