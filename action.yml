@@ -25,9 +25,9 @@ runs:
         mkdir -p "$BIN_DIR"
         cp -f "$(pwd)/dist/osls_bundle.js" "$BIN_DIR/osls_bundle.js"
         cat > "$BIN_DIR/osls" <<EOF
-#!/bin/sh
-exec node "$BIN_DIR/osls_bundle.js" "$@"
-EOF
+          #!/bin/sh
+          exec node "$BIN_DIR/osls_bundle.js" "$@"
+        EOF
         chmod +x "$BIN_DIR/osls"
         echo "$BIN_DIR" >> "$GITHUB_PATH"
 
