@@ -21,7 +21,7 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
-        BIN_DIR="${{ RUNNER_TEMP:-/tmp }}/osls/bin"
+        BIN_DIR="${{ runner.temp }}/osls/bin"
         mkdir -p "$BIN_DIR"
         cp -f "$(pwd)/dist/osls_bundle.js" "$BIN_DIR/osls_bundle.js"
         cat > "$BIN_DIR/osls" <<EOF
@@ -42,7 +42,7 @@ runs:
         Set-Content -Path "$bin\\osls.cmd" -Value $cmd -NoNewline -Encoding Ascii
         Add-Content -Path $Env:GITHUB_PATH -Value $bin
 
-    - id: verify
+    - id: verify-unix
       name: Verify Installation (Unix)
       if: runner.os != 'Windows'
       shell: bash
@@ -50,7 +50,7 @@ runs:
         echo "osls-version=$(osls --version)" >> $GITHUB_OUTPUT
         echo "osls-path=$(which osls)" >> $GITHUB_OUTPUT
 
-    - id: verify
+    - id: verify-windows
       name: Verify Installation (Windows)
       if: runner.os == 'Windows'
       shell: pwsh
