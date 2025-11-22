@@ -41,7 +41,7 @@ jobs:
 
       - name: Upload osls_bundle.js
         if: always()
-        uses: actions/upload-release-asset@v2
+        uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: dist/osls_bundle.js
@@ -50,7 +50,7 @@ jobs:
 
       - name: Upload node_modules tarball
         if: always() && ( -f dist/osls_node_modules.tgz )
-        uses: actions/upload-release-asset@v2
+        uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: dist/osls_node_modules.tgz
