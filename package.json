@@ -1,6 +1,6 @@
 {
 	"name": "action-osls",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "GitHub Action that installs the osls CLI globally",
 	"main": "dist/index.js",
 	"type": "commonjs",
