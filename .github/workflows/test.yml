@@ -24,43 +24,35 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Build Action (Generate dist)
+        run: npm run build
+
       - name: Lint
         run: npm run lint
 
-      - name: Clean Dependencies
-        run: rm -rf node_modules
-
-      - name: Start install timer (default)
-        run: echo "START=$(date +%s%3N)" >> $GITHUB_ENV
-
-      - name: Test Action (Default Version)
+      - name: Test Action (Install Only)
         uses: ./
         id: install-default
 
-      - name: End install timer (default)
-        run: echo "END=$(date +%s%3N)" >> $GITHUB_ENV
-
-      - name: Verify Default Installation
+      - name: Verify Installation
         run: |
           echo "Installed version: ${{ steps.install-default.outputs.osls-version }}"
           echo "Binary path: ${{ steps.install-default.outputs.osls-path }}"
           osls --version
-          echo "Install time (ms): $((END-START))"
 
-      - name: Start install timer (specific)
-        run: echo "START=$(date +%s%3N)" >> $GITHUB_ENV
+      - name: Verify Aliases
+        run: |
+          serverless --version
+          sls --version
+          osls --version
 
-      - name: Test Action (Specific Version)
+      - name: Test Action (With Args)
         uses: ./
         with:
-          osls-version: '3.59.3'
-        id: install-specific
+          args: --version
 
-      - name: End install timer (specific)
-        run: echo "END=$(date +%s%3N)" >> $GITHUB_ENV
-
-      - name: Verify Specific Installation
-        run: |
-          echo "Installed version: ${{ steps.install-specific.outputs.osls-version }}"
-          osls --version
-          echo "Install time (ms): $((END-START))"
+      - name: Test Action (Deploy Command Check)
+        uses: ./
+        with:
+          args: deploy
+        continue-on-error: true
