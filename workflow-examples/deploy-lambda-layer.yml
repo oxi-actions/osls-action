@@ -58,7 +58,7 @@ jobs:
 
       - name: Install OSLS (serverless v3 alternative) CLI
         #run: npm install -g osls
-        uses: oxi-actions/osls-action@v1.0.5
+        uses: oxi-actions/osls-action@v1.0.6
 
       - name: Deploy Layer
         run: |

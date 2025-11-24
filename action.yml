@@ -36,7 +36,8 @@ runs:
           cp -f "$GITHUB_ACTION_PATH/dist/osls_bundle.js" "$BIN_DIR/osls_bundle.js"
         else
           echo "dist/osls_bundle.js not present in action checkout — downloading release asset"
-          curl -fsSL -o "$BIN_DIR/osls_bundle.js" "https://github.com/${GITHUB_ACTION_REPOSITORY}/releases/latest/download/osls_bundle.js"
+          ACTION_REPO="${GITHUB_ACTION_REPOSITORY:-oxi-actions/osls-action}"
+          curl -fsSL -o "$BIN_DIR/osls_bundle.js" "https://github.com/${ACTION_REPO}/releases/latest/download/osls_bundle.js"
         fi
         export OSLS_BINARY_PATH="$BIN_DIR/osls"
         echo "OSLS_BINARY_PATH=$OSLS_BINARY_PATH"
@@ -55,12 +56,14 @@ runs:
           
           # Try to use the action ref (tag) if available, otherwise fallback to latest
           REF_TAG="${GITHUB_ACTION_REF:-latest}"
+          ACTION_REPO="${GITHUB_ACTION_REPOSITORY:-oxi-actions/osls-action}"
+          
           # If ref is a branch (e.g. master), it won't have a release, so check first
-          DOWNLOAD_URL="https://github.com/${GITHUB_ACTION_REPOSITORY}/releases/download/${REF_TAG}/osls_node_modules.tgz"
+          DOWNLOAD_URL="https://github.com/${ACTION_REPO}/releases/download/${REF_TAG}/osls_node_modules.tgz"
           
           if ! curl --head --silent --fail "$DOWNLOAD_URL" >/dev/null 2>&1; then
             echo "Release asset not found for ref '${REF_TAG}', falling back to 'latest'..."
-            DOWNLOAD_URL="https://github.com/${GITHUB_ACTION_REPOSITORY}/releases/latest/download/osls_node_modules.tgz"
+            DOWNLOAD_URL="https://github.com/${ACTION_REPO}/releases/latest/download/osls_node_modules.tgz"
           fi
           
           echo "Downloading dependencies from $DOWNLOAD_URL"
@@ -85,7 +88,9 @@ runs:
           Copy-Item -Path "$Env:GITHUB_ACTION_PATH\\dist\\osls_bundle.js" -Destination "$bin\\osls_bundle.js" -Force
         } else {
           Write-Host "dist/osls_bundle.js not present in action checkout — downloading release asset"
-          Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/$Env:GITHUB_ACTION_REPOSITORY/releases/latest/download/osls_bundle.js" -OutFile "$bin\\osls_bundle.js"
+          $repo = $Env:GITHUB_ACTION_REPOSITORY
+          if (-not $repo) { $repo = "oxi-actions/osls-action" }
+          Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/$repo/releases/latest/download/osls_bundle.js" -OutFile "$bin\\osls_bundle.js"
         }
         $cmd = '@echo off\r\nnode "%~dp0\\osls_bundle.js" %*\r\n'
         Set-Content -Path "$bin\\osls.cmd" -Value $cmd -NoNewline -Encoding Ascii
@@ -100,7 +105,10 @@ runs:
         } else {
           $ref = $Env:GITHUB_ACTION_REF
           if (-not $ref) { $ref = "latest" }
-          $url = "https://github.com/$Env:GITHUB_ACTION_REPOSITORY/releases/download/$ref/osls_node_modules.tgz"
+          $repo = $Env:GITHUB_ACTION_REPOSITORY
+          if (-not $repo) { $repo = "oxi-actions/osls-action" }
+          
+          $url = "https://github.com/$repo/releases/download/$ref/osls_node_modules.tgz"
           
           try {
              $req = [System.Net.WebRequest]::Create($url)
@@ -108,7 +116,7 @@ runs:
              $null = $req.GetResponse()
           } catch {
              Write-Host "Release asset not found for ref '$ref', falling back to 'latest'..."
-             $url = "https://github.com/$Env:GITHUB_ACTION_REPOSITORY/releases/latest/download/osls_node_modules.tgz"
+             $url = "https://github.com/$repo/releases/latest/download/osls_node_modules.tgz"
           }
 
           Write-Host "Downloading dependencies from $url"
