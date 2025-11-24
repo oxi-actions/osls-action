@@ -49,15 +49,30 @@ runs:
         ln -s "$OSLS_BINARY_PATH" "$BIN_DIR/sls" || true
 
         # extract packaged node_modules if present (ensures runtime requires resolve)
-        if [ -f "$GITHUB_ACTION_PATH/dist/osls_node_modules.tgz" ]; then
-          tar -C "$BIN_DIR" -xzf "$GITHUB_ACTION_PATH/dist/osls_node_modules.tgz"
-        else
-          if curl --head --silent --fail "https://github.com/${GITHUB_ACTION_REPOSITORY}/releases/latest/download/osls_node_modules.tgz" >/dev/null 2>&1; then
-            echo "Downloading osls_node_modules.tgz from latest release"
-            curl -fsSL -o "$BIN_DIR/osls_node_modules.tgz" "https://github.com/${GITHUB_ACTION_REPOSITORY}/releases/latest/download/osls_node_modules.tgz"
-            tar -C "$BIN_DIR" -xzf "$BIN_DIR/osls_node_modules.tgz"
+        NODE_MODULES_ARCHIVE="$GITHUB_ACTION_PATH/dist/osls_node_modules.tgz"
+        if [ ! -f "$NODE_MODULES_ARCHIVE" ]; then
+          echo "dist/osls_node_modules.tgz not found locally. Attempting download..."
+          
+          # Try to use the action ref (tag) if available, otherwise fallback to latest
+          REF_TAG="${GITHUB_ACTION_REF:-latest}"
+          # If ref is a branch (e.g. master), it won't have a release, so check first
+          DOWNLOAD_URL="https://github.com/${GITHUB_ACTION_REPOSITORY}/releases/download/${REF_TAG}/osls_node_modules.tgz"
+          
+          if ! curl --head --silent --fail "$DOWNLOAD_URL" >/dev/null 2>&1; then
+            echo "Release asset not found for ref '${REF_TAG}', falling back to 'latest'..."
+            DOWNLOAD_URL="https://github.com/${GITHUB_ACTION_REPOSITORY}/releases/latest/download/osls_node_modules.tgz"
           fi
+          
+          echo "Downloading dependencies from $DOWNLOAD_URL"
+          if ! curl -fsSL -o "$BIN_DIR/osls_node_modules.tgz" "$DOWNLOAD_URL"; then
+            echo "::error::Failed to download osls_node_modules.tgz. Please ensure you are using a valid release tag or that the release assets are available."
+            exit 1
+          fi
+          NODE_MODULES_ARCHIVE="$BIN_DIR/osls_node_modules.tgz"
         fi
+        
+        echo "Extracting dependencies..."
+        tar -C "$BIN_DIR" -xzf "$NODE_MODULES_ARCHIVE"
         echo "$BIN_DIR" >> "$GITHUB_PATH"
 
     - name: Install bundled osls (Windows)
@@ -79,15 +94,30 @@ runs:
         Add-Content -Path $Env:GITHUB_PATH -Value $bin
 
         # extract packaged node_modules if present
-        if (Test-Path "$Env:GITHUB_ACTION_PATH\\dist\\osls_node_modules.tgz") {
-          tar -C $bin -xzf "$Env:GITHUB_ACTION_PATH\\dist\\osls_node_modules.tgz"
+        $localArchive = "$Env:GITHUB_ACTION_PATH\\dist\\osls_node_modules.tgz"
+        if (Test-Path $localArchive) {
+          tar -C $bin -xzf $localArchive
         } else {
-          $asset = "https://github.com/$Env:GITHUB_ACTION_REPOSITORY/releases/latest/download/osls_node_modules.tgz"
+          $ref = $Env:GITHUB_ACTION_REF
+          if (-not $ref) { $ref = "latest" }
+          $url = "https://github.com/$Env:GITHUB_ACTION_REPOSITORY/releases/download/$ref/osls_node_modules.tgz"
+          
           try {
-            Invoke-WebRequest -UseBasicParsing -Uri $asset -OutFile "$bin\\osls_node_modules.tgz" -ErrorAction Stop
+             $req = [System.Net.WebRequest]::Create($url)
+             $req.Method = "HEAD"
+             $null = $req.GetResponse()
+          } catch {
+             Write-Host "Release asset not found for ref '$ref', falling back to 'latest'..."
+             $url = "https://github.com/$Env:GITHUB_ACTION_REPOSITORY/releases/latest/download/osls_node_modules.tgz"
+          }
+
+          Write-Host "Downloading dependencies from $url"
+          try {
+            Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile "$bin\\osls_node_modules.tgz" -ErrorAction Stop
             tar -C $bin -xzf "$bin\\osls_node_modules.tgz"
           } catch {
-            Write-Host "no node_modules tarball found in release; continuing"
+            Write-Error "Failed to download osls_node_modules.tgz. Please ensure you are using a valid release tag or that the release assets are available."
+            exit 1
           }
         }
 
