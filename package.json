@@ -9,7 +9,7 @@
 		"dist"
 	],
 	"scripts": {
-		"build": "ncc build src/index.js -o dist && esbuild src/osls-cli.js --bundle --platform=node --outfile=dist/osls_bundle.js --alias:punycode=./node_modules/punycode/punycode.js",
+		"build": "ncc build src/index.js -o dist && cp src/osls-cli.js dist/osls_bundle.js && ./scripts/package.sh",
 		"lint": "standard src/**/*.js",
 		"lint:fix": "standard --fix src/**/*.js",
 		"test": "npm run lint"
