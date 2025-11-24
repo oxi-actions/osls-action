@@ -1,0 +1,76 @@
+name: Deploy AWS Layer
+
+on:
+  workflow_dispatch:
+    inputs:
+      region:
+        description: 'AWS Region'
+        required: true
+        type: choice
+        default: us-east-1
+        options:
+          - us-east-1
+          - us-east-2
+          - us-west-1
+          - us-west-2
+          - ap-east-1
+          - eu-central-1
+      environment:
+        description: 'Environment (account) to deploy'
+        required: true
+        type: choice
+        options:
+          - aws-playground
+          - aws-production
+          - aws-production-2
+
+permissions:
+  id-token: write
+  contents: write
+
+env:
+  AWS_REGION: ${{ github.event.inputs.region }}
+  AWS_ROLE_SESSION_NAME: ghe-${{ github.ref_name }}-${{ github.run_id }}
+  AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT }}
+  AWS_ROLE_NAME: ${{ vars.AWS_IAM_ROLE }}
+
+jobs:
+  build-and-deploy:
+    environment: ${{ github.event.inputs.environment }}
+    name: Deploy Layer to AWS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v5
+
+      - name: Install Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ vars.AWS_IAM_ROLE }}
+          role-session-name: ${{ env.AWS_ROLE_SESSION_NAME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install OSLS (serverless v3 alternative) CLI
+        #run: npm install -g osls
+        uses: oxi-actions/osls-action@v1.0.5
+
+      - name: Deploy Layer
+        run: |
+          echo "🚀 Starting layer deployment to ${{ env.AWS_REGION }}"
+          AWS_ACCOUNT=${{ vars.AWS_ACCOUNT }} AWS_REGION=${{ env.AWS_REGION }} osls deploy
+          echo "✅ Layer deployment completed successfully"
+
+      - name: Deployment summary
+        run: |
+          echo "🎉 DEPLOYMENT SUMMARY 🎉"
+          echo "Environment: ${{ github.event.inputs.environment }}"
+          echo "Region: ${{ env.AWS_REGION }}"
+          echo "Build Time: $(date)"
+          echo "Commit SHA: ${{ github.sha }}"
+          echo "Branch: ${{ github.ref_name }}"
