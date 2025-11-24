@@ -9,6 +9,12 @@ inputs:
     description: "Version of the osls package to install (SemVer or tag)."
     required: false
     default: "3.59.3"
+  args:
+    description: "Arguments to pass to the osls command. If provided, osls will be executed with these arguments."
+    required: false
+  entrypoint:
+    description: "Override the default entrypoint (osls)."
+    required: false
 outputs:
   osls-version:
     description: "Detected osls version after installation."
@@ -39,6 +45,8 @@ runs:
         echo "exec node $BIN_DIR/osls_bundle.js \$@" >> "$OSLS_BINARY_PATH"
 
         chmod +x "$OSLS_BINARY_PATH"
+        ln -s "$OSLS_BINARY_PATH" "$BIN_DIR/serverless" || true
+        ln -s "$OSLS_BINARY_PATH" "$BIN_DIR/sls" || true
 
         # extract packaged node_modules if present (ensures runtime requires resolve)
         if [ -f "$GITHUB_ACTION_PATH/dist/osls_node_modules.tgz" ]; then
@@ -66,6 +74,8 @@ runs:
         }
         $cmd = '@echo off\r\nnode "%~dp0\\osls_bundle.js" %*\r\n'
         Set-Content -Path "$bin\\osls.cmd" -Value $cmd -NoNewline -Encoding Ascii
+        Copy-Item -Path "$bin\\osls.cmd" -Destination "$bin\\serverless.cmd" -Force
+        Copy-Item -Path "$bin\\osls.cmd" -Destination "$bin\\sls.cmd" -Force
         Add-Content -Path $Env:GITHUB_PATH -Value $bin
 
         # extract packaged node_modules if present
@@ -107,3 +117,23 @@ runs:
 
         $path = (Get-Command osls).Path
         Add-Content -Path $Env:GITHUB_OUTPUT -Value "osls-path=$path"
+
+    - name: Run osls command (Unix)
+      if: inputs.args != '' && runner.os != 'Windows'
+      shell: bash
+      env:
+        INPUT_ENTRYPOINT: ${{ inputs.entrypoint }}
+        INPUT_ARGS: ${{ inputs.args }}
+      run: |
+        CMD="${INPUT_ENTRYPOINT:-osls}"
+        $CMD $INPUT_ARGS
+
+    - name: Run osls command (Windows)
+      if: inputs.args != '' && runner.os == 'Windows'
+      shell: pwsh
+      env:
+        INPUT_ENTRYPOINT: ${{ inputs.entrypoint }}
+        INPUT_ARGS: ${{ inputs.args }}
+      run: |
+        $cmd = if ($Env:INPUT_ENTRYPOINT) { $Env:INPUT_ENTRYPOINT } else { "osls" }
+        Invoke-Expression "$cmd $Env:INPUT_ARGS"
