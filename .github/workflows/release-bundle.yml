@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '20'
           cache: 'npm'
@@ -37,3 +37,17 @@ jobs:
           generate_release_notes: true
           draft: false
           prerelease: false
+
+      - name: Update floating major version tag
+        run: |
+          # Extract the major version from the tag (e.g., v1.0.7 -> v1)
+          TAG=${GITHUB_REF#refs/tags/}
+          MAJOR_VERSION=$(echo "$TAG" | grep -oE '^v[0-9]+')
+          
+          if [ -n "$MAJOR_VERSION" ]; then
+            echo "Updating $MAJOR_VERSION tag to point to $TAG"
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git tag -fa "$MAJOR_VERSION" -m "Update $MAJOR_VERSION to $TAG"
+            git push origin "$MAJOR_VERSION" --force
+          fi
