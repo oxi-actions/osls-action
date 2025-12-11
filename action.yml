@@ -8,7 +8,7 @@ inputs:
   osls-version:
     description: "Version of the osls package to install (SemVer or tag)."
     required: false
-    default: "3.59.3"
+    default: "3.61"
   args:
     description: "Arguments to pass to the osls command. If provided, osls will be executed with these arguments."
     required: false

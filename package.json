@@ -26,14 +26,14 @@
 		"node": ">=18"
 	},
 	"dependencies": {
-		"@actions/core": "^1.11.1",
-		"@actions/exec": "^1.1.1",
-		"osls": "^3.59.3",
+		"@actions/core": "^2.0.1",
+		"@actions/exec": "^2.0.0",
+		"osls": "^3.61",
 		"punycode": "^2.3.1"
 	},
 	"devDependencies": {
 		"@vercel/ncc": "^0.38.4",
-		"esbuild": "^0.24.0",
+		"esbuild": "^0.27.1",
 		"standard": "^17.1.2"
 	},
 	"standard": {

@@ -13,7 +13,7 @@ echo "Installing production dependencies in $TEMP_DIR..."
 cd "$TEMP_DIR"
 npm init -y > /dev/null
 # Install osls (and punycode if needed)
-npm install osls@3.59.3 punycode --no-save --omit=dev
+npm install osls@3.61 punycode --no-save --omit=dev
 
 # Create the tarball
 echo "Creating osls_node_modules.tgz..."

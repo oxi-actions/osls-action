@@ -13,8 +13,8 @@ steps:
   - name: Install osls
     uses: oxi-actions/osls-action@v1
     with:
-      # Optional: Specify a version (defaults to 3.59.3)
-      osls-version: '3.59.3'
+      # Optional: Specify a version (defaults to 3.61)
+      osls-version: '3.61'
 
   - name: Deploy Application
     run: sls deploy
@@ -24,7 +24,7 @@ steps:
 
 | Input | Description | Required | Default |
 |-------|-------------|----------|---------|
-| `osls-version` | The version of the `osls` package to install. Can be a specific version (e.g., `3.59.3`) or a tag (e.g., `latest`). | No | `3.59.3` |
+| `osls-version` | The version of the `osls` package to install. Can be a specific version (e.g., `3.61`) or a tag (e.g., `latest`). | No | `3.61` |
 
 ## Outputs
 
