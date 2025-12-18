@@ -8,7 +8,7 @@ Note: this action ships a vendored, self-contained `osls` bundle in `dist/` so i
 
 ```yaml
 steps:
-  - uses: actions/checkout@v5
+  - uses: actions/checkout@v6
   
   - name: Install osls
     uses: oxi-actions/osls-action@v1
