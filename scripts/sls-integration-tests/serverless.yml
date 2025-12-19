@@ -1,0 +1,30 @@
+service: osls-integration-simple
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs24.x
+  region: us-east-1
+  stage: dev
+
+package:
+  individually: true
+  patterns:
+    - '!**/*'
+    - 'handler.js'
+
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - httpApi:
+          path: /hello
+          method: get
+
+  goodbye:
+    handler: handler.goodbye
+    events:
+      - httpApi:
+          path: /goodbye
+          method: get
