@@ -9,9 +9,16 @@
 		"dist"
 	],
 	"scripts": {
-		"build": "ncc build src/index.js -o dist && cp src/osls-cli.js dist/osls_bundle.js && ./scripts/package.sh",
+		"build": "npm run -s build:esbuild",
+		"build:ncc": "npm run -s bundle:ncc && npm run -s package:osls:cjs",
+		"build:esbuild": "npm run -s bundle:esbuild && npm run -s package:osls:cjs",
+		"bundle:ncc": "ncc build src/index.js -o dist --minify",
+		"bundle:esbuild": "esbuild src/index.js --bundle --minify --platform=node --target=node18 --outfile=dist/index.js",
 		"lint": "standard src/**/*.js",
 		"lint:fix": "standard --fix src/**/*.js",
+		"package:osls:cjs": "cp src/osls-cli.js dist/osls_bundle.js && ./scripts/package.sh",
+		"package:osls:esm": "cp src/osls-cli.mjs dist/osls_bundle.mjs && ./scripts/package.sh",
+		"test:dist": "node scripts/smoke-test-dist.mjs",
 		"test": "npm run lint"
 	},
 	"keywords": [
@@ -33,7 +40,7 @@
 	},
 	"devDependencies": {
 		"@vercel/ncc": "^0.38.4",
-		"esbuild": "^0.27.1",
+		"esbuild": "^0.27.2",
 		"standard": "^17.1.2"
 	},
 	"standard": {
