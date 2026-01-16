@@ -35,7 +35,7 @@
 	"dependencies": {
 		"@actions/core": "^2.0.2",
 		"@actions/exec": "^2.0.0",
-		"osls": "^3.61",
+		"osls": "^3.62",
 		"punycode": "^2.3.1"
 	},
 	"devDependencies": {
